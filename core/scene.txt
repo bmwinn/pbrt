@@ -1,0 +1,35 @@
+
+{Scene Declarations}:
+   class Scene {
+   public:
+      {Scene Public Methods}
+      {Scene Public Data}
+
+{Scene Public Data}:
+   Primitive *aggregate;
+   vector<Light *> lights;
+   VolumeRegion *volumeRegion;
+   BBox bound;
+
+{Scene Public Methods}:
+   bool Intersect(const Ray &ray, Intersection *isect) const {
+      bool hit = aggregate->Intersect(ray, isect);
+      return hit;
+   }
+
+   bool IntersectP(const Ray &ray) const {
+      bool hit = aggregate->IntersectP(ray);
+      return hit;
+   }
+
+{Scene Constructor Implementation}:
+   bound = aggregate->Worldbound();
+   if (volumeRegion)
+      bound = Union(bound, volumeregion->WorldBound());
+
+{Scene Method Definitions}:
+   const BBox &Scene::Worldbound() const {
+      return bound;
+   }
+
+

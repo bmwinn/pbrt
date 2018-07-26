@@ -1,0 +1,28 @@
+
+main program
+   int main(int argc, char *argv[]) {
+      Options options;
+      vector<string> filenames;
+      {Process command-line arguments}
+      pbrtInit(options);
+      {Process scene description}
+      pbrtCleanup();
+      return 0;
+
+{Proces scene description}:
+   if (filenames.size() == 0)
+      {Parse scene from stdin}
+   else
+      {Parse scene from input files}
+
+{Parse scene from stdin}:
+   ParseFile("-");
+
+{Parse scene from input files}:
+   for (u_int i = 0; i < filenames.size(); i++)
+      if (!ParseFile(filenames[i]))
+         Error("Couldn't open scene file \"%s\"",
+            filenames[i].c_str());
+
+
+

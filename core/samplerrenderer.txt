@@ -1,0 +1,96 @@
+
+{SamplerRenderer Declarations}:
+   class SamplerRenderer : public Renderer {
+   public:
+      {SamplerRenderer Public Methods}
+   private:
+      {SamplerRenderer Private Data}
+   };
+
+{SamplerRenderer Private Data}:
+   Sampler *sampler;
+   Camera *camera;
+   SurfaceIntegrator *surfaceIntegrator;
+   VolumeIntegrator *volumeIntegrator;
+
+{SamplerRenderer Method Definitions}:
+   SamplerRenderer::SamplerRenderer(Sampler *s, Camera *c,
+      SurfaceIntegrator *si, VolumeIntegrator *vi)
+   {
+      sampler = s;
+      camera = c;
+      surfaceIntegrator = si;
+      volumeIntegrator = vi;
+   }
+
+   void SamplerRenderer::Render(const Scene *scene) {
+      {Allow integrators to do preprocessing for the scene}
+      {Allocate and initialize sample}
+      {Create and launch SamplerRendererTasks for rendering image}
+      {Clean up after rendering and store final image}
+   }
+ 
+   Spectrum SamplerRenderer::Li(const Scene *scene,
+      const RayDifferential &ray, const Sample *sample, RNG &rng,
+      MemoryArena &arena, Intersection *isect, Spectrum *T) const
+   {
+      {Allocate local variables for isect and T if needed}
+      Spectrum Li = 0.f;
+      if (scene->Intersect(ray, isect))
+         Li = surfaceIntegrator->Li(scene, this, ray, *isect, sample,
+            rng, arena);
+      else {
+         {Handle ray that doesn't intersect any geometry}
+      }
+      Spectrum Lvi = volumeIntegrator->Li(scene, this, ray, sample,
+         rng, T, arena);
+      return *T * Li + Lvi;
+   }
+
+   Spectrum SamplerRenderer::Transmittance(const Scene *scene,
+      const RayDifferential &ray, const Sample *sample, RNG & rng,
+      MemoryArena &arena) const
+   {
+      return volumeIntegrator->Transmittance(scene, this, ray, sample,
+                                             rng, arena);
+   }
+
+{Allow integrators to do preprocessing for the scene}:
+   surfaceIntegrator->Preprocess(scene, camera, this);
+   volumeIntegrator->Preprocess(scene, camera, this);
+
+{Allocate and initialize sample}:
+   Sample *sample = new Sample(sampler, surfaceIntegrator,
+                               volumeIntegrator, scene);
+
+// parallel
+{Create and launch SamplerRendererTasks for rendering image}:
+   {Compute number of SamplerRendererTasks to create for rendering}
+   vector<Task *> renderTasks;
+   for (int i = 0; i < nTasks; ++i)
+      renderTasks.push_back(new SamplerRendererTask(scene, this, camera,
+                            sampler, sample, nTasks - 1 - i, nTasks));
+   EnqueueTasks(renderTasks);
+   WaitForAllTasks();
+   for (uint32_t i = 0; i < renderTasks.size(); ++i)
+      delete renderTasks[i];
+
+{Compute number of SamplerRendererTasks to create for rendering}:
+   int nPixels = camera->film->xResolution * camera->film->yResolution;
+   int nTasks = max(32 * NumSystemCores(), nPixels / (16 * 16));
+   nTasks = RoundUpPow2(nTasks);
+
+{Clean up after rendering and store final image}:
+   delete sample;
+   camera->film->WriteImage();
+
+{Allocate local variables for isect and T if needed}:
+   Spectrum localT;
+   if (!T) T = &localT;
+   Intersection localIsect;
+   if (!isect) isect = localIsect;
+
+{Handle ray that doesn't intersect any geometry}:
+   for (uint32_t i = 0; i < scene->lights.size(); ++i)
+      Li += scene->lights[i]->Le(ray);
+

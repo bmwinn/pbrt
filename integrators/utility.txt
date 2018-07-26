@@ -1,0 +1,21 @@
+{Integrator Utility Functions}:
+   Spectrum SpecularReflect(const RayDifferential &ray, BSDF *bsdf,
+      RNG &rng, const Intersection &isect, const Renderer *renderer,
+      const Scene *scene, const Sample *sample, MemoryArena &arena)
+   {
+      Vector wo = -ray.d, wi;
+      float pdf;
+      const Point &p = bsdf->dgShading.p;
+      const Normal &n = bsdf->dgShading.nn;
+      Spectrum f = bsdf->Sample_f(wo, &wi, BSDFSample(rng), &pdf,
+         BxDFType(BSDF_REFLECTION | BSDF_SPECULAR)_;
+      Spectrum L = 0.f;
+      if (pdf > 0.f && !f.IsBlack() && AbsDot(wi, n) != 0.f) {
+         {Compute ray differential rd for specular reflection}
+         Spectrum Li = renderer->Li(scene, rd, sample, rng, arena);
+         L = f * Li * AbsDot(wi, n) / pdf;
+      }
+      return L;
+   }
+
+

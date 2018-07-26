@@ -1,0 +1,23 @@
+2 phases of execution
+   1) parsing scene description file 
+   2) main rendering loop (clearly most time spent here)
+
+Parsing produces Scene obj and Renderer obj
+   Scene specifies contents of the scene
+   Renderer implements rendering algorithm
+
+Scene file format specified in docs/fileformat.pdf.
+File format user guide docs/usersguide.pdf.
+
+
+
+
+extern int globalCounter;
+if (--globalCounter == 0) {
+   printf("done!\n");
+}
+
+extern int globalCounter;
+// pg 38 - 41 parallelization
+
+
