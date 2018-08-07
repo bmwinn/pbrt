@@ -1,0 +1,34 @@
+
+{Transform Declarations}:
+   class Transform {
+   public:
+      {Transform Public Methods}
+   private:
+      {Transform Private Data}
+   };
+
+{Transform Private Data}:
+   Matrix4x4 m, mInv;
+
+{Transform Public Methods}:
+   Transform() {}
+  
+   Transform(const float mat[4][4]) {
+      m = Matrix4x4(mat[0][0], mat[0][1], mat[0][2], mat[0][3],
+                    mat[1][0], mat[1][1], mat[1][2], mat[1][3],
+                    mat[2][0], mat[2][1], mat[2][2], mat[2][3],
+                    mat[3][0], mat[3][1], mat[3][2], mat[3][3]);
+      mInv = Inverse(m);
+   }
+
+   Transform(const Matrix4x4 &mat)
+      : m(mat), mInv(Inverse(mat)) {}
+
+   Transform(const Matrix4x4 *mat, const Matrix4x4 &minv)
+      : m(mat), mInv(minv) {}
+
+   friend Transform Inverse(const Transform &t) {
+      return Transform(t.mInv, t.m);
+   }
+
+   

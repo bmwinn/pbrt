@@ -9,4 +9,13 @@ Parsing produces Scene obj and Renderer obj
 Scene file format specified in docs/fileformat.pdf.
 File format user guide docs/usersguide.pdf.
 
-
+Things I'm learning:
+ - When it's ok to let data be public
+     - ex. vectors, points, normals, rays
+ - What data to store, and which things can be computed on the go
+     - ex. a vector's length is computed on the go
+ - Having access to all fields at once
+     - ex. ray time for motion blur. I'm not going to implement motion blur for
+       a while, but the data is here.
+ - Naming variables conventiently
+     - ex. Ray origin and direction can be stored as "o" and "d"     
